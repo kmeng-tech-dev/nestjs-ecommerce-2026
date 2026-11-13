@@ -1,12 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
+import { CategoryService } from '../category/category.service.js';
 
 @Injectable()
 export class ProductService {
   private products = [
     { id: 1, name: 'Sample Product', price: 19.99, categoryId: 1 },
   ];
+
+  constructor(private readonly categoryService: CategoryService) {}
 
   findAll() {
     return this.products;
@@ -19,12 +22,18 @@ export class ProductService {
   }
 
   create(dto: CreateProductDto) {
+    // const categoryService = new CategoryService();
+    this.categoryService.findOne(dto.categoryId);
     const product = { id: this.products.length + 1, ...dto };
     this.products.push(product);
     return product;
   }
 
   update(id: number, dto: UpdateProductDto) {
+    if (dto.categoryId) {
+      this.categoryService.findOne(dto.categoryId);
+    }
+
     const product = this.findOne(id);
     Object.assign(product, dto);
     return product;
